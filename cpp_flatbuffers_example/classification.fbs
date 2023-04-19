@@ -1,0 +1,16 @@
+namespace dnn_vision;
+
+table GeneralClassification {
+  class_id:uint;
+  score:float;
+}
+
+table ClassificationData {
+  classification_list:[GeneralClassification];
+}
+
+table ClassificationTop {
+  perception:ClassificationData;
+}
+
+root_type ClassificationTop;

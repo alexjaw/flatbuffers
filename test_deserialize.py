@@ -10,7 +10,11 @@
 #
 # Object detection decoding modules also from
 # https://github.com/SonySemiconductorSolutions/aitrios-sdk-cloud-app-sample-python
+#
+# Typical classification decoding times
+# Decoding time: 0.0006712600006721914 to  0.0008231000028899871
 
+import time
 from deserializer.get_deserialize_data import get_deserialize_data_od,  get_deserialize_data_classification
 '''
 encoded = 'DAAAAAAABgAKAAQABgAAAAwAAAAAAAYACAAEAAYAAAAEAAAAAQAAABAAAAAMABQACAAHAAwAEAAMAAAAAAAAAQEAAAAUAAAAAADYPQwAEAAEAAAACAAMAAwAAAAMAAAAMwEAAFoAAAA='
@@ -20,7 +24,10 @@ print(f"INFERENCE DATA: {repr(encoded)}")
 print(f"DESERIALIZED: {repr(decoded)}")
 '''
 encoded = 'DAAAAAAABgAKAAQABgAAAAwAAAAAAAYACAAEAAYAAAAEAAAABQAAAEwAAAA0AAAAJAAAABQAAAAEAAAA0P///4sCAAAAAHA93P///18AAAAAAJg96P///5kDAAAAAPg99P///3MCAAAAAPg9CAAMAAQACAAIAAAAUQIAAAAA+D0='
+tic = time.perf_counter()
 decoded = get_deserialize_data_classification(encoded)
+toc = time.perf_counter()
+print(f"Decoding time: {toc - tic}")
 
 print(f"INFERENCE DATA: {repr(encoded)}")
 print(f"DESERIALIZED: {repr(decoded)}")

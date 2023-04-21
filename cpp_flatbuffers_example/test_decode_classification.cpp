@@ -1,8 +1,12 @@
-// refs:
-// https://github.com/gaspardpetit/base64
-// https://stackoverflow.com/questions/342409/how-do-i-base64-encode-decode-in-c/41094722#41094722
-// https://stackoverflow.com/questions/180947/base64-decode-snippet-in-c
+/*
+* decode base64 + fb deserialization time: 0.015..0.011 ms, 0.006..0.008 ms (using -O3 optimization)
+* refs:
+* https://github.com/gaspardpetit/base64
+* https://stackoverflow.com/questions/342409/how-do-i-base64-encode-decode-in-c/41094722#41094722
+* https://stackoverflow.com/questions/180947/base64-decode-snippet-in-c
+*/
 #include <iostream>
+#include <chrono>
 
 #include "polfosol.h"
 #include "classification_generated.h"
@@ -18,12 +22,20 @@ std::string decode(const std::string &base64) {
 }
 
 std::string deserialize(const std::string &base64) {
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
+
 	std::string r = "TBD";
+	auto tic = high_resolution_clock::now();
 	std::string decoded = decode(base64);
 	//std::cout << decoded<< std::endl;
-
 	auto detections = GetClassificationTop((unsigned char*)decoded.data());
 	auto perception = detections->perception();
+	auto toc = high_resolution_clock::now();;
+	duration<double, std::milli> ms_double = toc - tic;
+	std::cout << "decode base64 + fb deserialization time: " << ms_double.count() << " ms" << std::endl;
 	auto n = perception->classification_list()->size();
 	//std::cout << "n: " << n << std::endl;
 	for (int i=0; i<n; ++i) {

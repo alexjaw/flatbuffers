@@ -1,0 +1,1 @@
+std::string deserialize(const std::string &base64);

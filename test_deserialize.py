@@ -16,6 +16,7 @@
 
 import time
 from deserializer.get_deserialize_data import get_deserialize_data_od,  get_deserialize_data_classification
+import decode_example  # pybind11
 '''
 encoded = 'DAAAAAAABgAKAAQABgAAAAwAAAAAAAYACAAEAAYAAAAEAAAAAQAAABAAAAAMABQACAAHAAwAEAAMAAAAAAAAAQEAAAAUAAAAAADYPQwAEAAEAAAACAAMAAwAAAAMAAAAMwEAAFoAAAA='
 decoded = get_deserialize_data_od(encoded)
@@ -24,12 +25,30 @@ print(f"INFERENCE DATA: {repr(encoded)}")
 print(f"DESERIALIZED: {repr(decoded)}")
 '''
 encoded = 'DAAAAAAABgAKAAQABgAAAAwAAAAAAAYACAAEAAYAAAAEAAAABQAAAEwAAAA0AAAAJAAAABQAAAAEAAAA0P///4sCAAAAAHA93P///18AAAAAAJg96P///5kDAAAAAPg99P///3MCAAAAAPg9CAAMAAQACAAIAAAAUQIAAAAA+D0='
+
+print("Python decoding:")
 tic = time.perf_counter()
 decoded = get_deserialize_data_classification(encoded)
 toc = time.perf_counter()
-print(f"Decoding time: {toc - tic}")
+python_time = toc - tic
+print(f"Decoding time: {python_time}")
 
 print(f"INFERENCE DATA: {repr(encoded)}")
 print(f"DESERIALIZED: {repr(decoded)}")
 
+print()
+print()
+print("Python-cpp bindings decoding:")
+tic = time.perf_counter()
+decoded = decode_example.deserialize(encoded)
+toc = time.perf_counter()
+cpp_time = toc - tic
+print(f"Decoding time: {cpp_time}")
+
+print(f"INFERENCE DATA: {repr(encoded)}")
+print(f"DESERIALIZED: {repr(decoded)}")
+
+print()
+print()
+print(f"Speed-up: {python_time/cpp_time}")
 print('Finished')

@@ -1,62 +1,34 @@
 /*
-* decode base64 + fb deserialization time: 0.015..0.011 ms, 0.006..0.008 ms (using -O3 optimization)
+* decode base64 + fb deserialization time: 0.06..0.08 ms (using -O3 optimization)
+* only decode base64 + fb deserialization: 0.006..0.008 ms,
+*   i.e. the creation of the json return string adds a lot to the decoding time
 * refs:
 * https://github.com/gaspardpetit/base64
 * https://stackoverflow.com/questions/342409/how-do-i-base64-encode-decode-in-c/41094722#41094722
 * https://stackoverflow.com/questions/180947/base64-decode-snippet-in-c
+* https://www.boost.org/doc/libs/1_82_0/doc/html/property_tree.html
 */
 #include <iostream>
 #include <chrono>
+#include <string>
 
-#include "polfosol.h"
-#include "classification_generated.h"
+#include "decode_classification.hpp"
 
-using namespace dnn_vision;
-
-std::string encode(const std::string &bytes) {
-	return polfosol::b64encode((unsigned char*)bytes.data(), bytes.length());
-}
-
-std::string decode(const std::string &base64) {
-	return polfosol::b64decode((unsigned char*)base64.data(), base64.length());
-}
-
-std::string deserialize(const std::string &base64) {
-    using std::chrono::high_resolution_clock;
-    using std::chrono::duration_cast;
-    using std::chrono::duration;
-    using std::chrono::milliseconds;
-
-	std::string r = "TBD";
-	auto tic = high_resolution_clock::now();
-	std::string decoded = decode(base64);
-	//std::cout << decoded<< std::endl;
-	auto detections = GetClassificationTop((unsigned char*)decoded.data());
-	auto perception = detections->perception();
-	auto toc = high_resolution_clock::now();;
-	duration<double, std::milli> ms_double = toc - tic;
-	std::cout << "decode base64 + fb deserialization time: " << ms_double.count() << " ms" << std::endl;
-	auto n = perception->classification_list()->size();
-	//std::cout << "n: " << n << std::endl;
-	for (int i=0; i<n; ++i) {
-		auto class_id = perception->classification_list()->Get(i)->class_id();
-		auto score = perception->classification_list()->Get(i)->score();
-		std::cout << "i: " << i << ". class_id:" << class_id << ", score:" << score << std::endl;
-	}
-
-	return r;
-}
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::milliseconds;
 
 void testme() {
 	/* Expected output
-	i: 0. class_id:593, score:0.121094
-    i: 1. class_id:627, score:0.121094
-	i: 2. class_id:921, score:0.121094
-	i: 3. class_id:95, score:0.0742188
-	i: 4. class_id:651, score:0.0585938
+     * deserialized: {"1":{"C":"593","P":"0.121094"},"2":{"C":"627","P":"0.121094"},"3":{"C":"921","P":"0.121094"},"4":{"C":"95","P":"0.0742188"},"5":{"C":"651","P":"0.0585938"}}
     */
 	const std::string encoded = "DAAAAAAABgAKAAQABgAAAAwAAAAAAAYACAAEAAYAAAAEAAAABQAAAEwAAAA0AAAAJAAAABQAAAAEAAAA0P///4sCAAAAAHA93P///18AAAAAAJg96P///5kDAAAAAPg99P///3MCAAAAAPg9CAAMAAQACAAIAAAAUQIAAAAA+D0=";
+	auto tic = high_resolution_clock::now();
 	std::string deserialized = deserialize(encoded);
+	auto toc = high_resolution_clock::now();
+	duration<double, std::milli> ms_double = toc - tic;
+	std::cout << "decode base64 + fb deserialization time: " << ms_double.count() << " ms" << std::endl;
 	std::cout << "deserialized: " << deserialized << std::endl;
 }
 
